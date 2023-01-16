@@ -8,9 +8,6 @@
     Author of this version code: Emily Cordero
     cordeemi130@gmail.com
 
-    
-    Originally programmed by Atari in 1972. Features two paddles, controlled by players, with the goal of getting the ball past your opponent's edge. First to 10 points wins.
-    This version is built to more closely resemble the NES than the original Pong machines or the Atari 2600 in terms of resolution, though in widescreen (16:9) so it looks nicer on modern systems.
 ]]
 
 -- the push library will help us draw the game at a virtual res instead of how large the window is; the goal to make it more retro
@@ -29,15 +26,13 @@ function love.load()
     -- We are going to add the 'nearest neighbor' filtering to help prevent blrring of text/graphics
     love.graphics.setDefaultFilter('nearest', 'nearest')
 
-    -- Initialize our virtual resolution which will be rendered within out actual window regardless its dimensions. 
-    -- We are replacing the love.window.setMode
-    --[[love.window.setMode(WINDOW_WIDTH, WINDOW_HEIGHT, {
-        fullscreen = false, 
-        resizable = false, 
-        vsync = true
-    })
-end
-]]
+    -- We are adding the retro font for any text. We reference the font file and add the size
+    smallFont = love.graphics.newFont('font.ttf', 8)
+
+
+
+
+
 push:setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, {
     fullscreen = false, 
     resizable = false,
@@ -54,11 +49,23 @@ function love.keypressed(key)
 end
 
 -- Used to draw anything to the screen. I will be condensing the love.graphics.print function and will use push:apply to begin the render at virtual res and add another to end the rendering
+-- We will be adding a new feature to clear the screen with a specific color to make it similar to some versions of the original pong
+-- We also will drawing the text towards the top as we add the paddles and the ball to the screen
 function love.draw()
         push:apply('start')
 
-        love.graphics.printf('Hello Pong!', 0, VIRTUAL_HEIGHT / 2 - 6, VIRTUAL_WIDTH, 'center')
+        love.graphics.clear(40/255, 25/255, 52/255, 255/255)
 
+        love.graphics.printf('Hello Pong!', 0, 20, VIRTUAL_WIDTH, 'center')
+
+        -- Rendering the first paddle to be on the left side of the screen
+        love.graphics.rectangle('fill', 10,30,5,20)
+
+        -- Rendering the second paddle to be on the right side of the screen 
+        love.graphics.rectangle('fill', VIRTUAL_WIDTH - 10, VIRTUAL_HEIGHT -50, 5, 20)
+
+        -- Rendering the ball at the cnenter of the screen 
+        love.graphics.rectangle('fill', VIRTUAL_WIDTH / 2 - 2, VIRTUAL_HEIGHT / 2 -2, 4, 4)
         push:apply('end')
 end
 
