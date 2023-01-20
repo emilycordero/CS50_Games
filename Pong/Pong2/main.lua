@@ -65,27 +65,51 @@ end
 
 -- Runs every frame with 'dt' passed in 
 -- for the player 1 movement We want to add negative paddle speed to current Y scaled by deltaTime, we are setting bounds on the screen and math.max returns the greater of the 2 values and 0 and player Y makes sure we don't go over. Then when s is pressed we want to add positive paddle speed. 
+-- we are going to use math.max returns the greater of two values o and player Y will make sure that it won't go over it
 function love.update(dt)
     -- Player 1 movement
     if love.keyboard.isDown('w') then 
-        player1Y = player1Y + -PADDLE_SPEED * dt
+        player1Y = math.max(0, player1Y + -PADDLE_SPEED * dt)
     elseif love.keyboard.isDown('s') then
-        player1Y = player1Y + PADDLE_SPEED * dt
+        player1Y = math.min(VIRTUAL_HEIGHT - 20, player1Y + PADDLE_SPEED * dt)
     end
 
     -- Player 2 movement 
     if love.keyboard.isDown('up') then 
-        player2Y = player2Y + -PADDLE_SPEED * dt
+        player2Y = math.max(0, player2Y + -PADDLE_SPEED * dt)
     elseif love.keyboard.isDown('down') then
-        player2Y = player2Y + PADDLE_SPEED * dt
+        player2Y = math.min(VIRTUAL_HEIGHT - 20, player2Y + PADDLE_SPEED * dt)
+    end
+
+    -- Update the ball based on its DX and DY only while in play state and for it to be scaled by dt
+    if gameState == 'play' then 
+        ballX = ballX + ballDX * dt
+        ballY = ballY + ballDY * dt
     end
 end
 
 -- Keyboard handling which is called by LOVE2D at each frame and it passes in the key we press to have access.
+-- Keys can be accessed by string name and we will use a function LOVE2D gives us to terminate app
+-- If we press enter during the start state of the game we will go into play mode
+
 function love.keypressed(key)
-    -- Keys can be accessed by string name and we will use a function LOVE2D gives us to terminate app
     if key == 'escape' then
         love.event.quit()
+
+    elseif key == 'enter' or key == 'return' then
+        if  gameState == 'start'then
+            gameState = 'play'
+        else
+            gameState = 'start'
+
+            -- the ball's position will be in the middle
+            ballX = VIRTUAL_WIDTH / 2 - 2
+            ballY = VIRTUAL_HEIGHT / 2 - 2
+
+            -- similar to ternary operation like in C
+            ballDX = math.random(2) == 1 and 100 or -100
+            ballDY = math.random(-50, 50) * 1.5
+        end
     end
 end
 
@@ -99,7 +123,13 @@ function love.draw()
 
         -- Swapping the font before printing
         love.graphics.setFont(smallFont)
-        love.graphics.printf('Hello Pong!', 0, 20, VIRTUAL_WIDTH, 'center')
+        
+        -- Draw different things based on the gameState
+        if gameState == 'start' then 
+            love.graphics.printf('Hello Start State!', 0, 20, VIRTUAL_WIDTH,'center')
+        else
+            love.graphics.printf('Hello Play State!', 0, 20, VIRTUAL_WIDTH, 'center')
+        end
 
         -- Draw score on the right and left center of the screen
         love.graphics.setFont(scoreFont)
